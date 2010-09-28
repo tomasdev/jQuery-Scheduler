@@ -1,0 +1,71 @@
+html, body, div, h1, h2, h3, h4, h5, h6, ul, dl, li, dt, dd, p, blockquote, pre, form, fieldset, table, th, td { margin: 0; padding: 0; } object, embed { outline:0 } a img, fieldset{ border:0; }
+
+body{
+	font: 13px/1 sans-serif;
+	padding:30px;
+}
+
+#cal-grid {
+	position:relative;
+}
+#cal-grid .grid-container{
+	overflow:auto;
+	width:1000px;
+}
+#cal-grid .rows-container{
+	position:absolute;
+	left:0;
+}
+#cal-grid .grid-month{
+	border-bottom:1px solid #ccc;
+	text-align: center;
+}
+#cal-grid .odd{
+	background:#eee;
+}
+#cal-grid .rows-container, #cal-grid .grid-month, #cal-grid .days{
+	border-right:1px solid #ccc;
+}
+#cal-grid .days{
+	overflow:hidden;
+	text-align:center;
+}
+#cal-grid .info{
+	overflow: hidden;
+	position:relative;
+}
+#cal-grid .day{
+	display:block;
+	float:left;
+}
+#cal-grid .days, #cal-grid .row{
+	border-bottom:1px solid #ccc;
+}
+#cal-grid .ui-selecting { cursor:pointer; background: #FECA40; }
+#cal-grid .ui-selected, #cal-grid .ui-selected.odd { background: #F39814; color: white; }
+
+#cal-grid .saving{
+	background:#000;color:#fff;
+	background:rgba(0,0,0,0.2);
+	font-size:10px;
+	overflow:hidden;
+	position:absolute;top:0;
+	text-align:left;
+	z-index:10;
+}
+#cal-grid .saving.saved{
+	background: #F39814;
+}
+#cal-grid .saving.notsaved{
+	background: #FCC;
+	color: #f00;
+	cursor: pointer;
+}
+#cal-grid .saving.notsaved a{
+	color: #f00;
+}
+
+#cal-grid .one, #cal-grid .two{
+	overflow: hidden;
+}
+#cal-grid .grid-month, #cal-grid .days{ float:left; }

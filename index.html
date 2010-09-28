@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<title>Scheduler</title>
+	<link rel="stylesheet" href="cal-grid.css" type="text/css" media="screen"  />
+	
+	<!--[if IE]><style>header,footer,nav,article,section{display:block}</style><script>document.createElement("header");document.createElement("footer");document.createElement("nav");document.createElement("article");document.createElement("section");</script><![endif]-->
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.3/jquery-ui.min.js"></script>
+<script type="text/javascript">
+var s = new Date();
+function friendly(string){
+	return string.toLowerCase().replace(/^\s+|\s+$/g, "").replace(/[_|\s]+/g, "-").replace(/[^a-z0-9-]+/g, "").replace(/[-]+/g, "-").replace(/^-+|-+$/g, "");
+}
+function getMonth(classes){
+	classes = classes.split(" ");
+	for(m in classes){
+		var month = (" january | february | march | april | may | june | july | august | september | october | november | december ").indexOf(" "+classes[m]+" ");
+		if(month > -1){
+			month = classes[m];
+			break;
+		}else{
+			month = false;
+		}
+	}
+	return month;
+}
+var calendar = {
+	January: 31,
+	February: 28,
+	March: 31,
+	April: 30,
+	May: 31,
+	June: 30,
+	July: 31,
+	August: 31,
+	September: 30,
+	October: 31,
+	November: 30,
+	December: 31
+};
+var settings = {
+	dayWidth: "20px",
+	dayHeight: "20px",
+	jsonLoad: "URL", // url del .php que tira ne JSON la info que se guardo en la DB
+	rows: {
+		category1: ["Single Room", "Double Room", "Triple Room"],
+		category2: ["Suite", "Premium Suite"],
+		category3: ["Shared Room", "Shared Suite"]
+	},
+	rowsWidth: "300px"
+};
+$(function(){
+	var id = "#cal-grid";
+	var c = $(id), rows = "", prefix = 'calgrid-';
+	c.css({paddingLeft: settings.rowsWidth});
+	for(category in settings.rows){
+		rows += '<div class="category" id="'+prefix+category+'">';
+		for(row in settings.rows[category]){
+			rows += '<div class="row" id="'+prefix+friendly(settings.rows[category][row])+'" style="line-height:'+settings.dayHeight+'">'+settings.rows[category][row]+'</div>';
+		}
+		rows += '</div>';
+	}
+	c.append('<div id="'+prefix+'rows-container" class="rows-container" style="top:'+(parseInt(settings.dayHeight)*2)+'px;width:'+settings.rowsWidth+'">'+rows+'</div>');
+	c.append('<div id="'+prefix+'grid-container" class="grid-container"><div id="'+prefix+'grid-table"><div id="'+prefix+'grid-head"></div><div id="'+prefix+'grid-body"></div></div></div>');
+	var t = $('#'+prefix+'grid-body'), h = $('#'+prefix+'grid-head'), add = "", add2 = "", mdays = '', soWidth = "", tableWidth = 0;
+	for(month in calendar){
+		soWidth = ((parseInt(settings.dayWidth)*calendar[month]))+'px';
+		tableWidth += parseInt(soWidth);
+		add += '<div class="grid-month" style="width:'+soWidth+'">'+month+"</div>";
+		mdays += '<div class="'+month.toLowerCase()+' days" style="width:'+soWidth+'">';
+		add2 += '<div class="'+month.toLowerCase()+' days" style="width:'+soWidth+'">';
+		for(var i=1; i <= calendar[month];i++){
+			mdays += '<div class="day" style="width:'+settings.dayWidth+';line-height:'+settings.dayHeight+'">&nbsp;</div>';
+			add2 += '<div class="day" style="width:'+settings.dayWidth+';line-height:'+settings.dayHeight+'">'+i+'</div>';
+		}
+		add2 += '</div>';
+		mdays += '</div>';
+	}
+	var rowshtml = "";
+	for(var i=0, j = c.find(".rows-container .row").length; i < j; i++){
+		rowshtml += '<div class="info">'+mdays+"</div>";
+	}
+	t.append(rowshtml);
+	h.append('<div class="one">'+add+'</div><div class="two">' + add2 + '</div>');
+	$('#'+prefix+'grid-table').css({ width: (tableWidth+12) }); // 12 is the border ;)
+	c.find('.rows-container').css({ top: h.height() });
+	t.find('.days div:odd').addClass("odd");
+	t.find('.info').selectable({
+		stop: function(event, ui){
+			// var result = $("#select-result").empty();
+			var month = "", posLeft = 1000, days = 0, sv, info = "";
+			$(".ui-selected", this).each(function(){
+				month = getMonth($(this).parent().attr("class"));
+				info += ($("div", $(this).parent().get(0)).index(this) +1)+"|"+month+",";
+				posLeft = ($(this).position().left < posLeft)?$(this).position().left:posLeft;
+				$(this).removeClass("ui-selected").addClass("disabled");
+				days++;
+			});
+
+			if(info != ""){
+				sv = '<div class="saving" style="width:'+(parseInt(settings.dayHeight))*days+'px;left:'+posLeft+'px;height:'+parseInt(settings.dayHeight)+'px;">GUARDANDO...</div>';
+				$(this).append(sv);
+				$(event.target).selectable( "option", "disabled", true );
+				$.post("save.php", "submit="+info, function(data){
+					if(data.toUpperCase().indexOf("ERROR") > -1){
+						$(".saving:not(.saved):not(.notsaved)").text(data).addClass("notsaved").click(function(){
+							$(this).remove();
+						});
+					}else{				
+						$(".saving:not(.saved):not(.notsaved)").text(data).addClass("saved");
+					}
+					$(event.target).selectable( "option", "disabled", false );
+				});
+			}
+		},
+		filter: '.days div:not(.saving):not(.disabled)'
+	});
+//	$(".saving").draggable({ containment: 'parent', cursor: 'move', grid: [20,20] }); */
+var f = new Date();
+var t = f-s;
+alert(t+"ms, son "+(t/1000)+" segs");
+});
+</script>
+
+</head>
+<body>
+<div id="select-result"></div>
+<div id="cal-grid"></div>
+
+</body>
+</html>
